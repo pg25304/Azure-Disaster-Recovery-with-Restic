@@ -220,21 +220,17 @@ Future improvements could include:
 
 ## Repository Structure
 
-    Azure-Disaster-Recovery-with-Restic/
-    │
-    ├── Infrastructure/
-    │   └── main.bicep
-    │
-    ├── docs/
-    │   ├── architecture.png
-    │   └── DR-RUNBOOK.md
-    │
-    ├── evidence/
-    │   ├── backup-snapshot.png
-    │   ├── restore-verification.png
-    │   └── teardown.png
-    │
-    └── README.md
+Azure-Disaster-Recovery-with-Restic/
+│
+├── main.bicep
+│   Azure Bicep infrastructure-as-code template
+│
+├── 01_GITHUB_COMPLETE_PROJECT_Azure_Disaster_Recovery_with_Restic.docx
+│   Complete technical project report including architecture,
+│   implementation evidence, recovery validation and screenshots
+│
+└── README.md
+    Project overview, methodology, results and references
 
 ---
 
