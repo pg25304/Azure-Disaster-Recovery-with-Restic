@@ -27,8 +27,6 @@ RTO represents the maximum acceptable downtime, while RPO represents the maximum
 
 The environment was deployed in **Azure UK South**.
 
-The infrastructure included:
-
 | Component | Implementation | Purpose |
 |---|---|---|
 | Infrastructure as Code | Azure Bicep | Repeatable deployment and rebuild |
@@ -64,8 +62,8 @@ The protected directory was:
 
 A successful Restic snapshot was created with:
 
-**Snapshot ID:** `bd699b68`  
-**Timestamp:** `14:29:20 UTC – 21 September 2026`
+- **Snapshot ID:** `bd699b68`
+- **Timestamp:** `14:29:20 UTC – 21 September 2026`
 
 The snapshot contained the application data required for recovery, including `index.html`.
 
@@ -77,20 +75,14 @@ Restic supports restoring selected or latest snapshots and provides repository i
 
 The simulated disaster represented **loss of the application server and its infrastructure**, rather than simply deleting an individual file.
 
-The recovery therefore required both:
+Recovery required:
 
 1. **Infrastructure reconstruction**
 2. **Application-data restoration**
 
 Azure Bicep was used to recreate the required infrastructure.
 
-Azure Activity Log evidence recorded the VM create/update operation beginning at:
-
-`15:00:53 UTC`
-
-and succeeding at:
-
-`15:01:00 UTC`
+Azure Activity Log evidence recorded the VM create/update operation beginning at `15:00:53 UTC` and succeeding at `15:01:00 UTC`.
 
 This represents approximately **7.5 seconds of Azure VM resource provisioning time**.
 
@@ -130,7 +122,9 @@ The restore followed Restic's documented snapshot recovery process (Restic, 2026
 | RTO | 60 minutes | Recovery underway by 14:52 UTC; restored data verified around 15:24–15:25 UTC | Recovery completed within the planned objective based on available evidence |
 | VM provisioning | N/A | 15:00:53–15:01:00 UTC | Approximately 7.5 seconds; not the full RTO |
 
-The recovery procedure successfully demonstrated that the Azure infrastructure could be recreated and that the existing Restic recovery point remained accessible from the rebuilt VM.
+The recovery procedure demonstrated that the Azure infrastructure could be recreated and that the existing Restic recovery point remained accessible from the rebuilt VM.
+
+The VM provisioning measurement is deliberately separated from the overall recovery objective because RTO concerns restoration of the required service rather than simply creation of the Azure VM resource (Microsoft, 2026a).
 
 ---
 
@@ -150,7 +144,7 @@ The managed identity existed independently of the individual VM lifecycle. This 
 
 The Restic repository was also independent of the protected compute workload. Losing the application VM therefore did not remove the recovery copy.
 
-This approach is consistent with NIST contingency-planning guidance, which emphasizes recovery strategies, testing and maintaining recovery capability (Swanson et al., 2010).
+This approach is consistent with NIST contingency-planning guidance, which emphasises recovery strategies, testing and maintaining recovery capability (Swanson et al., 2010).
 
 ---
 
@@ -160,11 +154,11 @@ Recovery was not considered complete simply because the Restic restore command s
 
 I also:
 
-- Listed the restored files.
-- Displayed `index.html`.
-- Checked recovered file metadata.
-- Verified the original file timestamp.
-- Ran `restic check`.
+- Listed the restored files
+- Displayed `index.html`
+- Checked recovered file metadata
+- Verified the original file timestamp
+- Ran `restic check`
 
 The repository integrity check completed with:
 
@@ -190,7 +184,7 @@ Restic provided file-level recovery, so database-consistency mechanisms were out
 
 Although **GZRS** improved storage durability, I did not perform an Azure regional failover. Therefore, this implementation should not be described as a tested multi-region application failover (Microsoft, 2026b; Microsoft, 2026c).
 
-I have previously implemented a separate **Azure Failover and Load Balancing** project (April–May 2017), which explored Azure failover and service availability in greater depth:
+I have previously implemented a separate **Azure Failover and Load Balancing** project (April–May 2017), which explored Azure failover and service availability in greater depth.
 
 **LinkedIn project:**  
 https://www.linkedin.com/in/paymanghorbani/details/projects/
@@ -226,19 +220,46 @@ Future improvements could include:
 
 ## Repository Structure
 
-```text
-Azure-Disaster-Recovery-with-Restic/
-│
-├── Infrastructure/
-│   └── main.bicep
-│
-├── docs/
-│   ├── architecture.png
-│   └── DR-RUNBOOK.md
-│
-├── evidence/
-│   ├── backup-snapshot.png
-│   ├── restore-verification.png
-│   └── teardown.png
-│
-└── README.md
+    Azure-Disaster-Recovery-with-Restic/
+    │
+    ├── Infrastructure/
+    │   └── main.bicep
+    │
+    ├── docs/
+    │   ├── architecture.png
+    │   └── DR-RUNBOOK.md
+    │
+    ├── evidence/
+    │   ├── backup-snapshot.png
+    │   ├── restore-verification.png
+    │   └── teardown.png
+    │
+    └── README.md
+
+---
+
+## Conclusion
+
+This project provided a practical demonstration of both **infrastructure recovery and data recovery**. Azure Bicep was used to recreate the cloud infrastructure, while Restic recovered the protected application data from Azure Blob Storage.
+
+The use of a user-assigned managed identity reduced reliance on stored Azure credentials, while separating the Restic repository from the application VM ensured that loss of the compute resource did not also remove the recovery copy.
+
+The recovery test demonstrated that the backup repository remained accessible after the application server was rebuilt and that the protected application data could be successfully restored and validated. This reflects the wider DR principle of planning for recovery of both infrastructure and workload data rather than relying only on availability controls (Microsoft, 2026a; Microsoft, 2026c).
+
+The exercise also highlighted the importance of testing and validating recovery procedures rather than assuming that the existence of a backup guarantees successful recovery (Swanson et al., 2010).
+
+---
+
+## References
+
+Microsoft (2026a) *What are business continuity, high availability, and disaster recovery?* Microsoft Learn. Available at: https://learn.microsoft.com/en-us/azure/reliability/concept-business-continuity-high-availability-disaster-recovery (Accessed: 21 September 2026).
+
+Microsoft (2026b) *Azure Storage redundancy*. Microsoft Learn. Available at: https://learn.microsoft.com/en-us/azure/storage/common/storage-redundancy (Accessed: 21 September 2026).
+
+Microsoft (2026c) *Develop a disaster recovery plan for multi-region deployments*. Azure Well-Architected Framework. Available at: https://learn.microsoft.com/en-us/azure/well-architected/design-guides/disaster-recovery (Accessed: 21 September 2026).
+
+Restic (2026a) *Restoring from backup – restic 0.19.1 documentation*. Available at: https://restic.readthedocs.io/en/stable/050_restore.html (Accessed: 21 September 2026).
+
+Restic (2026b) *Working with repositories – restic 0.19.1 documentation*. Available at: https://restic.readthedocs.io/en/stable/045_working_with_repos.html (Accessed: 21 September 2026).
+
+Swanson, M., Bowen, P., Phillips, A.W., Gallup, D. and Lynes, D. (2010) *Contingency Planning Guide for Federal Information Systems*. NIST Special Publication 800-34 Rev. 1. Gaithersburg, MD: National Institute of Standards and Technology. doi:10.6028/NIST.SP.800-34r1.
